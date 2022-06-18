@@ -52,7 +52,6 @@ class AuthController extends Controller
         return response()->json([
             'user' => new UserResource($user),
             'access_token' => $accessToken->plainTextToken,
-            'raw_token' => $accessToken,
         ]);
     }
 

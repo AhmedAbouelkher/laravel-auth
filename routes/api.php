@@ -28,15 +28,9 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-Route::prefix('products')->group(function () {
-    // show all products
-    Route::get('/', [ProductController::class, 'index']);
-
-    // Show product with id
-    Route::get('/{id}', [ProductController::class, 'show']);
-});
-
 Route::prefix('account')->middleware('auth:sanctum')->group(function () {
+    Route::get('/products', [ProductController::class, 'userProducts']);
+
     // Create product
     Route::post('/products', [ProductController::class, 'store']);
 
@@ -45,6 +39,14 @@ Route::prefix('account')->middleware('auth:sanctum')->group(function () {
 
     // Delete product with id
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+});
+
+Route::prefix('products')->group(function () {
+    // show all products
+    Route::get('/', [ProductController::class, 'index']);
+
+    // Show product with id
+    Route::get('/{id}', [ProductController::class, 'show']);
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {

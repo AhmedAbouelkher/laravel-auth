@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -14,7 +15,25 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return Product::latest()->get();
+        return Product::query()
+            ->with(['user', 'media'])
+            ->latest()
+            ->paginate();
+    }
+
+    /**
+     * Fetch User's products.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function userProducts(Request $request)
+    {
+        return Product::query()
+            ->with(['media'])
+            ->where('user_id', $request->user()->id)
+            ->latest()
+            ->paginate();
     }
 
     /**
@@ -29,15 +48,15 @@ class ProductController extends Controller
             'name' => 'required',
             'description' => 'min:10',
             'price' => 'required:numeric',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
-        //TODO: attach user to the product
-        $productFields['user_id'] = 1;
-
-        //TODO: generate slug
-        $productFields['slug'] = "this is dummy";
+        $productFields['user_id'] = auth()->id();
+        $productFields['slug'] = Str::slug($request->name);
 
         $product = Product::create($productFields);
+
+        $product->addMediaFromRequest('image')->toMediaCollection('products');
 
         return response()->json($product, 201);
     }
